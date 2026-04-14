@@ -1,12 +1,13 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import { env } from "./env";
 
 declare global {
   // Reuse the Prisma client in development to avoid exhausting DB connections on reloads.
   var prisma: PrismaClient | undefined;
 }
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = env.DATABASE_URL;
 
 if (!connectionString) {
   throw new Error("DATABASE_URL is not set.");
@@ -20,6 +21,6 @@ export const prisma =
     adapter,
   });
 
-if (process.env.NODE_ENV !== "production") {
+if (env.NODE_ENV !== "production") {
   globalThis.prisma = prisma;
 }

@@ -1,8 +1,11 @@
 // Express set up 
 import express from "express";
 import cors from "cors";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger";
 import { notFound } from "./middleware/notFound";
 import { errorHandler } from "./middleware/errorHandler";
+import authRoutes from "./modules/auth/auth.routes";
 
 const app = express();
 
@@ -14,6 +17,9 @@ app.get("/", (_req, res) => {
     message: "API is running",
   });
 });
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/auth", authRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
