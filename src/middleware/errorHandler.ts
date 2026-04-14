@@ -1,3 +1,4 @@
+//Global Handlers for errors in the applications
 import type { NextFunction, Request, Response } from "express";
 
 type ErrorWithStatus = Error & {
