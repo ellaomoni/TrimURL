@@ -6,6 +6,8 @@ import { swaggerSpec } from "./config/swagger";
 import { notFound } from "./middleware/notFound";
 import { errorHandler } from "./middleware/errorHandler";
 import authRoutes from "./modules/auth/auth.routes";
+import linksRoutes from "./modules/links/links.routes";
+
 
 const app = express();
 
@@ -20,6 +22,7 @@ app.get("/", (_req, res) => {
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/auth", authRoutes);
+app.use("/links", linksRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
