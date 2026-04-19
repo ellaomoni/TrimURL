@@ -38,3 +38,5 @@ model ClickEvent {
   shortLinkId String
   shortLink   ShortLink @relation(fields: [shortLinkId], references: [id], onDelete: Cascade)
 }
+
+clickEvents ClickEvent[]

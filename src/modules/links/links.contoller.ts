@@ -1,3 +1,4 @@
+import { trackClickEvent } from "../analytics/analytics.services";
 import { NextFunction, Response, Request } from "express";
 import { AuthenticatedRequest } from "../../middleware/auth";
 import { AppError } from "../../utils/appErrors";
@@ -96,7 +97,6 @@ export const deleteLink = async (
   }
 };
 
-// Redirect controller for handling short code redirection
 export const redirectToLongUrl = async (
   req: Request,
   res: Response,
@@ -106,6 +106,21 @@ export const redirectToLongUrl = async (
     const { shortCode } = req.params;
 
     const link = await getLinkByShortCode(shortCode as string);
+
+    const ipAddress =
+      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+      req.socket.remoteAddress ||
+      null;
+
+    const userAgent = req.get("user-agent") || null;
+    const referrer = req.get("referer") || null;
+
+    await trackClickEvent({
+      shortLinkId: link.id,
+      ipAddress,
+      userAgent,
+      referrer,
+    });
 
     return res.redirect(link.longUrl);
   } catch (error) {
