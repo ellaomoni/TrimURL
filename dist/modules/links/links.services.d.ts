@@ -9,5 +9,6 @@ export declare const getSingleUserLink: (userId: string, linkId: string) => Prom
 export declare const deleteUserLink: (userId: string, linkId: string) => Promise<{
     message: string;
 }>;
+export declare const getLinkByShortCode: (shortCode: string) => Promise<any>;
 export {};
 //# sourceMappingURL=links.services.d.ts.map

@@ -7,9 +7,34 @@ import {
   deleteLink,
   getLinkById,
   getLinks,
+  redirectToLongUrl,
 } from "./links.contoller";
 
 const router = Router();
+
+/**
+ * @openapi
+ * /links/r/{shortCode}:
+ *   get:
+ *     summary: Redirect to the original long URL
+ *     tags:
+ *       - Links
+ *     parameters:
+ *       - in: path
+ *         name: shortCode
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The generated short code or custom alias
+ *     responses:
+ *       302:
+ *         description: Redirects to the original long URL
+ *       404:
+ *         description: Short link not found
+ *       410:
+ *         description: Short link has expired
+ */
+router.get("/r/:shortCode", redirectToLongUrl);
 
 router.use(authMiddleware);
 

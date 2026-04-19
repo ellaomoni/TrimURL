@@ -6,6 +6,29 @@ const validate_1 = require("../../middleware/validate");
 const links_validation_1 = require("./links.validation");
 const links_contoller_1 = require("./links.contoller");
 const router = (0, express_1.Router)();
+/**
+ * @openapi
+ * /links/r/{shortCode}:
+ *   get:
+ *     summary: Redirect to the original long URL
+ *     tags:
+ *       - Links
+ *     parameters:
+ *       - in: path
+ *         name: shortCode
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The generated short code or custom alias
+ *     responses:
+ *       302:
+ *         description: Redirects to the original long URL
+ *       404:
+ *         description: Short link not found
+ *       410:
+ *         description: Short link has expired
+ */
+router.get("/r/:shortCode", links_contoller_1.redirectToLongUrl);
 router.use(auth_1.authMiddleware);
 /**
  * @openapi

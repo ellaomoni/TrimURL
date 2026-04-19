@@ -1,9 +1,10 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Response, Request } from "express";
 import { AuthenticatedRequest } from "../../middleware/auth";
 import { AppError } from "../../utils/appErrors";
 import {
   createShortLink,
   deleteUserLink,
+  getLinkByShortCode,
   getSingleUserLink,
   getUserLinks,
 } from "./links.services";
@@ -90,6 +91,23 @@ export const deleteLink = async (
       success: true,
       message: result.message,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Redirect controller for handling short code redirection
+export const redirectToLongUrl = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { shortCode } = req.params;
+
+    const link = await getLinkByShortCode(shortCode as string);
+
+    return res.redirect(link.longUrl);
   } catch (error) {
     next(error);
   }

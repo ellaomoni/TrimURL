@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUserLink = exports.getSingleUserLink = exports.getUserLinks = exports.createShortLink = void 0;
+exports.getLinkByShortCode = exports.deleteUserLink = exports.getSingleUserLink = exports.getUserLinks = exports.createShortLink = void 0;
 const prisma_1 = require("../../config/prisma");
 const appErrors_1 = require("../../utils/appErrors");
 const generateShortcodes_1 = require("../../utils/generateShortcodes");
@@ -113,4 +113,23 @@ const deleteUserLink = async (userId, linkId) => {
     };
 };
 exports.deleteUserLink = deleteUserLink;
+//Redirect function to handles the redirection logic to the original URL when a short URL is accessed.
+const getLinkByShortCode = async (shortCode) => {
+    const link = await prisma_1.prisma.shortLink.findFirst({
+        where: {
+            OR: [
+                { shortCode },
+                { customAlias: shortCode },
+            ],
+        },
+    });
+    if (!link) {
+        throw new appErrors_1.AppError("Short link not found", 404);
+    }
+    if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
+        throw new appErrors_1.AppError("This short link has expired", 410);
+    }
+    return link;
+};
+exports.getLinkByShortCode = getLinkByShortCode;
 //# sourceMappingURL=links.services.js.map

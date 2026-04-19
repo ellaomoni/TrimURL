@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteLink = exports.getLinkById = exports.getLinks = exports.createLink = void 0;
+exports.redirectToLongUrl = exports.deleteLink = exports.getLinkById = exports.getLinks = exports.createLink = void 0;
 const appErrors_1 = require("../../utils/appErrors");
 const links_services_1 = require("./links.services");
 const createLink = async (req, res, next) => {
@@ -70,4 +70,16 @@ const deleteLink = async (req, res, next) => {
     }
 };
 exports.deleteLink = deleteLink;
+// Redirect controller for handling short code redirection
+const redirectToLongUrl = async (req, res, next) => {
+    try {
+        const { shortCode } = req.params;
+        const link = await (0, links_services_1.getLinkByShortCode)(shortCode);
+        return res.redirect(link.longUrl);
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.redirectToLongUrl = redirectToLongUrl;
 //# sourceMappingURL=links.contoller.js.map

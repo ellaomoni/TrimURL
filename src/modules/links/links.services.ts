@@ -133,3 +133,25 @@ export const deleteUserLink = async (userId: string, linkId: string) => {
     message: "Link deleted successfully",
   };
 };
+
+//Redirect function to handles the redirection logic to the original URL when a short URL is accessed.
+export const getLinkByShortCode = async (shortCode: string) => {
+  const link = await prisma.shortLink.findFirst({
+    where: {
+      OR: [
+        { shortCode },
+        { customAlias: shortCode },
+      ],
+    },
+  });
+
+  if (!link) {
+    throw new AppError("Short link not found", 404);
+  }
+
+  if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
+    throw new AppError("This short link has expired", 410);
+  }
+
+  return link;
+};
