@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../utils/appErrors";
 import { generateShortCode } from "../../utils/generateShortcodes";
+import { env } from "../../config/env";
 
 type CreateLinkInput = {
   longUrl: string;
@@ -22,6 +23,21 @@ const generateUniqueShortCode = async (): Promise<string> => {
   }
 
   return shortCode;
+};
+
+const formatShortLinkResponse = (link: {
+  id: string;
+  longUrl: string;
+  shortCode: string;
+  customAlias: string | null;
+  expiresAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}) => {
+  return {
+    ...link,
+    shortUrl: `${env.APP_BASE_URL}/links/r/${link.shortCode}`,
+  };
 };
 
 export const createShortLink = async (
@@ -64,27 +80,52 @@ export const createShortLink = async (
     },
   });
 
-  return createdLink;
+  if (expiresAt && new Date(expiresAt) <= new Date()) {
+  throw new AppError("Expiry date must be in the future", 400);
+}
+
+  return formatShortLinkResponse(createdLink);
 };
 
-export const getUserLinks = async (userId: string) => {
-  const links = await prisma.shortLink.findMany({
-    where: { userId },
-    orderBy: {
-      createdAt: "desc",
-    },
-    select: {
-      id: true,
-      longUrl: true,
-      shortCode: true,
-      customAlias: true,
-      expiresAt: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
+export const getUserLinks = async (
+  userId: string,
+  page = 1,
+  limit = 10
+) => {
+  const skip = (page - 1) * limit;
 
-  return links;
+  const [links, total] = await Promise.all([
+    prisma.shortLink.findMany({
+      where: { userId },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: limit,
+      select: {
+        id: true,
+        longUrl: true,
+        shortCode: true,
+        customAlias: true,
+        expiresAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    }),
+    prisma.shortLink.count({
+      where: { userId },
+    }),
+  ]);
+
+  return {
+    items: links.map(formatShortLinkResponse),
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 };
 
 export const getSingleUserLink = async (userId: string, linkId: string) => {
@@ -108,7 +149,7 @@ export const getSingleUserLink = async (userId: string, linkId: string) => {
     throw new AppError("Link not found", 404);
   }
 
-  return link;
+ return formatShortLinkResponse(link);
 };
 
 export const deleteUserLink = async (userId: string, linkId: string) => {
@@ -130,6 +171,7 @@ export const deleteUserLink = async (userId: string, linkId: string) => {
   });
 
   return {
+    id: existingLink.id,
     message: "Link deleted successfully",
   };
 };

@@ -8,12 +8,17 @@ import { errorHandler } from "./middleware/errorHandler";
 import authRoutes from "./modules/auth/auth.routes";
 import linksRoutes from "./modules/links/links.routes";
 import analyticsRoutes from "./modules/analytics/analytics.routes";
-
+import { env } from "./config/env";
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+app.use(
+  cors({
+    origin: env.CORS_ORIGIN,
+    credentials: true,
+  })
+);
+app.use(express.json({ limit: "1mb" }));
 
 app.get("/", (_req, res) => {
   res.status(200).json({

@@ -1,3 +1,4 @@
+import { env } from "../../config/env";
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../utils/appErrors";
 
@@ -37,7 +38,6 @@ export const getLinkAnalytics = async (userId: string, linkId: string) => {
       createdAt: true,
     },
   });
-
   if (!link) {
     throw new AppError("Link not found", 404);
   }
@@ -92,8 +92,13 @@ export const getLinkAnalytics = async (userId: string, linkId: string) => {
   );
 
   return {
-    link,
-    totalClicks,
+    summary: {
+      totalClicks,
+    },
+    link: {
+      ...link,
+      shortUrl: `${env.APP_BASE_URL}/links/r/${link.shortCode}`,
+    },
     recentClicks,
     clicksOverTime,
   };

@@ -42,7 +42,10 @@ export const getLinks = async (
       throw new AppError("Unauthorized", 401);
     }
 
-    const links = await getUserLinks(req.user.userId);
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
+
+    const links = await getUserLinks(req.user.userId, page, limit);
 
     res.status(200).json({
       success: true,
@@ -91,6 +94,9 @@ export const deleteLink = async (
     res.status(200).json({
       success: true,
       message: result.message,
+      data: {
+    id: result.id,
+  },
     });
   } catch (error) {
     next(error);
