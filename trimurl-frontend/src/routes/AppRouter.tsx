@@ -6,7 +6,7 @@ import  AnalyticsPage  from "../pages/AnalyticsPage";
 import NotFoundPage  from "../pages/NotFoundPage";
 import ProtectedRoute from "../components/ProtectedRoute";
 
-export default function AppRouter() {
+export default function AppRouter() { 
   return (
     <BrowserRouter>
       <Routes>

@@ -4,6 +4,7 @@ exports.getLinkByShortCode = exports.deleteUserLink = exports.getSingleUserLink 
 const prisma_1 = require("../../config/prisma");
 const appErrors_1 = require("../../utils/appErrors");
 const generateShortcodes_1 = require("../../utils/generateShortcodes");
+const env_1 = require("../../config/env");
 const generateUniqueShortCode = async () => {
     let shortCode = (0, generateShortcodes_1.generateShortCode)(6);
     let existingLink = await prisma_1.prisma.shortLink.findUnique({
@@ -16,6 +17,12 @@ const generateUniqueShortCode = async () => {
         });
     }
     return shortCode;
+};
+const formatShortLinkResponse = (link) => {
+    return {
+        ...link,
+        shortUrl: `${env_1.env.APP_BASE_URL}/links/r/${link.shortCode}`,
+    };
 };
 const createShortLink = async (userId, payload) => {
     const { longUrl, customAlias, expiresAt } = payload;
@@ -49,26 +56,45 @@ const createShortLink = async (userId, payload) => {
             userId: true,
         },
     });
-    return createdLink;
+    if (expiresAt && new Date(expiresAt) <= new Date()) {
+        throw new appErrors_1.AppError("Expiry date must be in the future", 400);
+    }
+    return formatShortLinkResponse(createdLink);
 };
 exports.createShortLink = createShortLink;
-const getUserLinks = async (userId) => {
-    const links = await prisma_1.prisma.shortLink.findMany({
-        where: { userId },
-        orderBy: {
-            createdAt: "desc",
+const getUserLinks = async (userId, page = 1, limit = 10) => {
+    const skip = (page - 1) * limit;
+    const [links, total] = await Promise.all([
+        prisma_1.prisma.shortLink.findMany({
+            where: { userId },
+            orderBy: {
+                createdAt: "desc",
+            },
+            skip,
+            take: limit,
+            select: {
+                id: true,
+                longUrl: true,
+                shortCode: true,
+                customAlias: true,
+                expiresAt: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        }),
+        prisma_1.prisma.shortLink.count({
+            where: { userId },
+        }),
+    ]);
+    return {
+        items: links.map(formatShortLinkResponse),
+        meta: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
         },
-        select: {
-            id: true,
-            longUrl: true,
-            shortCode: true,
-            customAlias: true,
-            expiresAt: true,
-            createdAt: true,
-            updatedAt: true,
-        },
-    });
-    return links;
+    };
 };
 exports.getUserLinks = getUserLinks;
 const getSingleUserLink = async (userId, linkId) => {
@@ -90,7 +116,7 @@ const getSingleUserLink = async (userId, linkId) => {
     if (!link) {
         throw new appErrors_1.AppError("Link not found", 404);
     }
-    return link;
+    return formatShortLinkResponse(link);
 };
 exports.getSingleUserLink = getSingleUserLink;
 const deleteUserLink = async (userId, linkId) => {
@@ -109,6 +135,7 @@ const deleteUserLink = async (userId, linkId) => {
         },
     });
     return {
+        id: existingLink.id,
         message: "Link deleted successfully",
     };
 };

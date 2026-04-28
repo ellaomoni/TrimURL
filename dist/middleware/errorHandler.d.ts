@@ -1,7 +1,3 @@
-import type { NextFunction, Request, Response } from "express";
-type ErrorWithStatus = Error & {
-    statusCode?: number;
-};
-export declare function errorHandler(err: ErrorWithStatus, _req: Request, res: Response, _next: NextFunction): void;
-export {};
+import { NextFunction, Request, Response } from "express";
+export declare const errorHandler: (err: any, _req: Request, res: Response, _next: NextFunction) => Response<any, Record<string, any>>;
 //# sourceMappingURL=errorHandler.d.ts.map
