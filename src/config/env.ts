@@ -15,6 +15,11 @@ if (!/^[a-fA-F0-9]{64}$/.test(jwtSecret)) {
     "JWT_SECRET must be exactly 64 hexadecimal characters (32 random bytes encoded as hex)."
   );
 }
+//CORS
+const corsOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 export const env = {
   PORT: Number(process.env.PORT) || 3000,
@@ -22,5 +27,5 @@ export const env = {
   NODE_ENV: process.env.NODE_ENV ?? "development",
   JWT_SECRET: jwtSecret,
   APP_BASE_URL: process.env.APP_BASE_URL || "http://localhost:5000",
-  CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
+  CORS_ORIGIN: corsOrigins,
 };

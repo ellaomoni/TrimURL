@@ -14,7 +14,14 @@ const app = express();
 
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
+    origin: (origin, callback) => {
+      // Allow browser apps from configured origins and non-browser tools like curl/Postman.
+      if (!origin || env.CORS_ORIGIN.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );

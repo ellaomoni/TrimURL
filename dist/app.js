@@ -16,7 +16,14 @@ const analytics_routes_1 = __importDefault(require("./modules/analytics/analytic
 const env_1 = require("./config/env");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
-    origin: env_1.env.CORS_ORIGIN,
+    origin: (origin, callback) => {
+        // Allow browser apps from configured origins and non-browser tools like curl/Postman.
+        if (!origin || env_1.env.CORS_ORIGIN.includes(origin)) {
+            callback(null, true);
+            return;
+        }
+        callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
 }));
 app.use(express_1.default.json({ limit: "1mb" }));
