@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEventHandler, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../layouts/authLayout";
 import { registerUser } from "../api/authApi";
@@ -11,10 +11,11 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
+   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) =>  {
     e.preventDefault();
     setErrorMessage("");
     setIsSubmitting(true);
@@ -27,8 +28,7 @@ export default function RegisterPage() {
       navigate("/dashboard");
     } catch (error: any) {
       setErrorMessage(
-        error?.response?.data?.message ||
-          "Unable to create account. Please try again."
+        error?.response?.data?.message || "Unable to create account."
       );
     } finally {
       setIsSubmitting(false);
@@ -37,18 +37,19 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout
-      title="Create your account"
-      subtitle="Start shortening links and tracking performance."
+      title="Create account"
+      subtitle="Start creating short links and tracking performance."
     >
-      <form className="space-y-5" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Name
+            Full name
           </label>
           <input
             type="text"
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
-            placeholder="Your full name"
+            required
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-900"
+            placeholder="Your name"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -56,11 +57,12 @@ export default function RegisterPage() {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Email
+            Email address
           </label>
           <input
             type="email"
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+            required
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-900"
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -73,30 +75,31 @@ export default function RegisterPage() {
           </label>
           <input
             type="password"
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
-            placeholder="Choose a password"
+            required
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-900"
+            placeholder="Minimum 6 characters"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
         {errorMessage && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {errorMessage}
-          </div>
+          </p>
         )}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
         >
           {isSubmitting ? "Creating account..." : "Create account"}
         </button>
 
         <p className="text-center text-sm text-slate-500">
           Already have an account?{" "}
-          <Link to="/login" className="font-medium text-slate-900">
+          <Link to="/login" className="font-semibold text-slate-950">
             Log in
           </Link>
         </p>

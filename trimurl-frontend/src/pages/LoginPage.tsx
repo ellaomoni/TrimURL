@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEventHandler, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../layouts/authLayout";
 import { loginUser } from "../api/authApi";
@@ -10,10 +10,11 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     setErrorMessage("");
     setIsSubmitting(true);
@@ -26,7 +27,7 @@ export default function LoginPage() {
       navigate("/dashboard");
     } catch (error: any) {
       setErrorMessage(
-        error?.response?.data?.message || "Unable to log in. Please try again."
+        error?.response?.data?.message || "Unable to log in. Try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -36,16 +37,17 @@ export default function LoginPage() {
   return (
     <AuthLayout
       title="Welcome back"
-      subtitle="Log in to manage your short links and analytics."
+      subtitle="Log in to manage your short links and view analytics."
     >
-      <form className="space-y-5" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Email
+            Email address
           </label>
           <input
             type="email"
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+            required
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-900"
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -58,7 +60,8 @@ export default function LoginPage() {
           </label>
           <input
             type="password"
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+            required
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-900"
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -66,23 +69,23 @@ export default function LoginPage() {
         </div>
 
         {errorMessage && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {errorMessage}
-          </div>
+          </p>
         )}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
         >
           {isSubmitting ? "Logging in..." : "Log in"}
         </button>
 
         <p className="text-center text-sm text-slate-500">
           Don&apos;t have an account?{" "}
-          <Link to="/register" className="font-medium text-slate-900">
-            Create one
+          <Link to="/register" className="font-semibold text-slate-950">
+            Create account
           </Link>
         </p>
       </form>
