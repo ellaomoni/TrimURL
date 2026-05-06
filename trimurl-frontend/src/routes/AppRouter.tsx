@@ -5,12 +5,13 @@ import  DashboardPage  from "../pages/DashboardPage";
 import  AnalyticsPage  from "../pages/AnalyticsPage";
 import NotFoundPage  from "../pages/NotFoundPage";
 import ProtectedRoute from "../components/ProtectedRoute";
+import LandingPage from "../pages/LandingPage";
 
 export default function AppRouter() { 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
