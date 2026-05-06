@@ -25,3 +25,13 @@ export const getCurrentUser = async () => {
   const response = await api.get("/auth/me");
   return response.data;
 };
+
+export type VerifyEmailPayload = {
+  email: string;
+  code: string;
+};
+
+export const verifyEmail = async (payload: VerifyEmailPayload) => {
+  const response = await api.post("/auth/verify-email", payload);
+  return response.data;
+};

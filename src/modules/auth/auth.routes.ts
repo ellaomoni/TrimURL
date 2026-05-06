@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { login, me, register } from "./auth.controller";
+import { login, me, register, verifyEmail, } from "./auth.controller";
 import { validate } from "../../middleware/validate";
-import { loginSchema, registerSchema } from "./auth.validation";
+import { loginSchema, registerSchema, verifyEmailSchema } from "./auth.validation";
 import { authMiddleware } from "../../middleware/auth";
 
 const router = Router();
@@ -88,5 +88,36 @@ router.post("/login", validate(loginSchema), login);
  *         description: Unauthorized
  */
 router.get("/me", authMiddleware, me);
+
+/**
+ * @openapi
+ * /auth/verify-email:
+ *   post:
+ *     summary: Verify user email with code
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - code
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: test@example.com
+ *               code:
+ *                 type: string
+ *                 example: 123456
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       400:
+ *         description: Invalid verification code
+ */
+router.post("/verify-email", validate(verifyEmailSchema), verifyEmail);
 
 export default router;

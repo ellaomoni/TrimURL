@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../utils/appErrors";
 import { generateToken } from "../../utils/jwt";
+import { generateVerificationCode } from "../../utils/generateVerificationCodes";
+import { sendVerificationEmail } from "../../utils/email";
 
 type RegisterInput = {
   name: string;
@@ -27,19 +29,26 @@ export const registerUser = async (payload: RegisterInput) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  const verificationCode = generateVerificationCode();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
   const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt: true,
-    },
-  });
+  data: {
+    name,
+    email,
+    password: hashedPassword,
+    emailVerificationCode: verificationCode,
+    emailCodeExpiresAt: expiresAt,
+  },
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    emailVerified: true,
+    createdAt: true,
+  },
+});
+await sendVerificationEmail(email, verificationCode);
 
   const token = generateToken({
     userId: user.id,
@@ -62,6 +71,10 @@ export const loginUser = async (payload: LoginInput) => {
   if (!user) {
     throw new AppError("Invalid email or password", 401);
   }
+
+  if (!user.emailVerified) {
+  throw new AppError("Please verify your email before logging in", 403);
+}
 
   const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
@@ -102,4 +115,47 @@ export const getCurrentUser = async (userId: string) => {
   }
 
   return user;
+};
+
+export const verifyUserEmail = async (email: string, code: string) => {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  if (user.emailVerified) {
+    throw new AppError("Email already verified", 400);
+  }
+
+  if (!user.emailVerificationCode || !user.emailCodeExpiresAt) {
+    throw new AppError("Verification code not found", 400);
+  }
+
+  if (user.emailVerificationCode !== code) {
+    throw new AppError("Invalid verification code", 400);
+  }
+
+  if (user.emailCodeExpiresAt < new Date()) {
+    throw new AppError("Verification code has expired", 400);
+  }
+
+  const verifiedUser = await prisma.user.update({
+    where: { email },
+    data: {
+      emailVerified: true,
+      emailVerificationCode: null,
+      emailCodeExpiresAt: null,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      emailVerified: true,
+    },
+  });
+
+  return verifiedUser;
 };

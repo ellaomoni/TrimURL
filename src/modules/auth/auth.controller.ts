@@ -3,9 +3,11 @@ import {
   getCurrentUser,
   loginUser,
   registerUser,
+  verifyUserEmail,
 } from "./auth.services";
 import { AuthenticatedRequest } from "../../middleware/auth";
 import { AppError } from "../../utils/appErrors";
+
 
 export const register = async (
   req: Request,
@@ -58,6 +60,26 @@ export const me = async (
     res.status(200).json({
       success: true,
       message: "Current user fetched successfully",
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, code } = req.body;
+
+    const user = await verifyUserEmail(email, code);
+
+    res.status(200).json({
+      success: true,
+      message: "Email verified successfully. You can now log in.",
       data: user,
     });
   } catch (error) {

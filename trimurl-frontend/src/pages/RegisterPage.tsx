@@ -21,11 +21,10 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await registerUser({ name, email, password });
-      const { token, user } = response.data;
-
-      setAuthData(token, user);
-      navigate("/dashboard");
+      await registerUser({ name, email, password });
+      navigate("/verify-email", {
+      state: { email },
+    });
     } catch (error: any) {
       setErrorMessage(
         error?.response?.data?.message || "Unable to create account."
