@@ -27,7 +27,7 @@ export const env = {
   NODE_ENV: process.env.NODE_ENV ?? "development",
   JWT_SECRET: jwtSecret,
   APP_BASE_URL: process.env.APP_BASE_URL || "http://localhost:5000",
-  CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
+  CORS_ORIGIN: corsOrigins,
   SMTP_HOST: process.env.SMTP_HOST || "",
   SMTP_PORT: Number(process.env.SMTP_PORT) || 587,
   SMTP_USER: process.env.SMTP_USER || "",

@@ -14,6 +14,10 @@ const swaggerDefinition = {
       url: `http://localhost:${env.PORT}`,
       description: "Local development server",
     },
+    {
+      url: `https://trimurl-socp.onrender.com`,
+      description: "Production server",
+    }
   ],
   components: {
     securitySchemes: {
